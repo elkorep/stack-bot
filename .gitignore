@@ -1,0 +1,7 @@
+# dependencies
+/node_modules
+
+# config files
+config.json
+applianceDB.json
+slack-config.json
