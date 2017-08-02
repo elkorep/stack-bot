@@ -1,7 +1,7 @@
 var appliance = require('./applianceDB.json');
 var config = require('./slack-config.json');
-var childProcess = require('child_process');
 var RtmClient = require('@slack/client').RtmClient;
+var SSH = require('simple-ssh');
 
 var CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
@@ -19,7 +19,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
 
   var status = (res[0] === 'show' && res[1] === 'status' && res[2] === 'of');
   var version = (res[0] === 'show' && res[1] === 'version' && res[2] === 'of');
-  var upgrade = (res[0] === 'upgrade' && res[1] === 'stack' &&
+  var update = (res[0] === 'update' && res[2] === 'stack' &&
    res[3] === 'to' && res[4] === 'latest');
 
   if (status || version) {
@@ -34,11 +34,12 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
     }
   }
 
-  if (upgrade) {
-    var mangementNode = res[2];
+  if (update) {
+    var mangementNode = res[1];
+    var buildVersion = res[5];
     app = checkifServerExist(mangementNode);
     if (app) {
-      upgradeApplianceToLatest(app);
+      upgradeApplianceToLatest(app, buildVersion);
     } else {
       applianceDoesntExist();
     }
@@ -61,23 +62,30 @@ function checkifServerExist(serverName) {
 }
 
 function checkApplianceSystem(server, command) {
-  var cmd = 'sshpass -p ' + server.password + ' ssh ' +
-  server.username + '@' + server.hostname + ' system ' + command;
   var reply = server.hostname + '\n ----------------\n';
-  var stat = childProcess.exec(cmd, function(err, stdout, stderr) {
-    if (stdout) { rtm.sendMessage(reply.concat(stdout), channel); };
-    if (stderr) { rtm.sendMessage(stderr, channel); };
-  });
+  var errorReply = server.name + ' stack is unresponsive...please troubleshoot';
 
-  stat.on('exit', function(code) {
-    console.log('child process spawn exited with exit code ' + code);
-    var reply = server.name + ' stack is unresponsive...please troubleshoot';
-    if (code == 255) { rtm.sendMessage(reply, channel); };
+  var ssh = new SSH({
+    host: server.hostname,
+    user: server.username,
+    pass: server.password,
   });
+  ssh.exec('system ' + command, {
+    out: function(stdout) {
+      if (stdout) { rtm.sendMessage(reply.concat(stdout), channel); };
+    },
+    err: function(stderr) {
+      if (stderr) { rtm.sendMessage(stderr, channel); };
+    },
+    exit: function(code) {
+      console.log(code);
+      if (code == 1) { rtm.sendMessage(errorReply, channel); };
+    },
+  }).start();
 }
 
-function upgradeApplianceToLatest(server) {
-  reply = 'Upgrading ' + server.hostname + ' to latest...';
+function upgradeApplianceToLatest(server, buildVersion) {
+  reply = 'Upgrading ' + server.hostname + ' to latest ' + buildVersion + ' ' + buildURL;
   rtm.sendMessage(reply, channel);
 }
 
