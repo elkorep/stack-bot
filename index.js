@@ -1,4 +1,4 @@
-var appliance = require('./applianceDB.json');
+var checkappliance = require('./source/checkappliance.js');
 var config = require('./slack-config.json');
 var RtmClient = require('@slack/client').RtmClient;
 var SSH = require('simple-ssh');
@@ -23,9 +23,9 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
    res[3] === 'to' && res[4] === 'latest');
 
   if (status || version) {
-    var nodeCommand = res[0] + ' ' + res[1];
+    var nodeCommand = res[1];
     var mangementNode = res[3];
-    app = checkifServerExist(mangementNode);
+    app = checkappliance.checkifServerExist(mangementNode);
 
     if (app) {
       checkApplianceSystem(app, nodeCommand);
@@ -46,47 +46,34 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
   }
 });
 
-function checkifServerExist(serverName) {
-  for (var i = 0; i < Object.keys(appliance).length; i++) {
-    if (serverName === appliance[i].name) {
-      var app = {
-        name: appliance[i].name,
-        hostname: appliance[i].hostname,
-        username: appliance[i].username,
-        password: appliance[i].password,
-      };
-      return app;
-    }
-  }
-  return;
-}
-
 function checkApplianceSystem(server, command) {
   var reply = server.hostname + '\n ----------------\n';
-  var errorReply = server.name + ' stack is unresponsive...please troubleshoot';
+  var errorReply = server.name + ' stack is unresponsive...please troubleshoot\n';
 
   var ssh = new SSH({
     host: server.hostname,
     user: server.username,
     pass: server.password,
   });
-  ssh.exec('system ' + command, {
+
+  ssh.exec('system', {
+    args: ['show', command],
     out: function(stdout) {
       if (stdout) { rtm.sendMessage(reply.concat(stdout), channel); };
     },
     err: function(stderr) {
-      if (stderr) { rtm.sendMessage(stderr, channel); };
+      console.log(stderr); // this-does-not-exist: command not found
     },
     exit: function(code) {
       console.log(code);
       if (code == 1) { rtm.sendMessage(errorReply, channel); };
     },
   }).start();
-}
 
-function upgradeApplianceToLatest(server, buildVersion) {
-  reply = 'Upgrading ' + server.hostname + ' to latest ' + buildVersion + ' ' + buildURL;
-  rtm.sendMessage(reply, channel);
+  ssh.on('error', function(err) {
+    rtm.sendMessage(errorReply.concat(err), channel);
+    ssh.end();
+  });
 }
 
 function applianceDoesntExist() {
