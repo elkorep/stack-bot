@@ -14,3 +14,17 @@ exports.checkifServerExist = function(serverName) {
   }
   return;
 };
+
+exports.listStacks = function() {
+  var stacks = {
+    length: Object.keys(appliance).length,
+    names: [],
+    hostnames: [],
+  };
+
+  for (var i = 0; i < Object.keys(appliance).length; i++) {
+    stacks.names[i] = appliance[i].name;
+    stacks.hostnames[i] = appliance[i].hostname;
+  }
+  return stacks;
+};

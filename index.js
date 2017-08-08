@@ -21,6 +21,8 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
   var version = (res[0] === 'show' && res[1] === 'version' && res[2] === 'of');
   var update = (res[0] === 'update' && res[2] === 'stack' &&
    res[3] === 'to' && res[4] === 'latest');
+  var reset = (res[0] === 'reset' && res[1] === 'stack');
+  var list = (res[0] === 'list' && res[1] === 'stacks');
 
   if (status || version) {
     var nodeCommand = res[1];
@@ -37,14 +39,49 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
   if (update) {
     var mangementNode = res[1];
     var buildVersion = res[5];
-    app = checkifServerExist(mangementNode);
+    app = checkappliance.checkifServerExist(mangementNode);
     if (app) {
       upgradeApplianceToLatest(app, buildVersion);
     } else {
       applianceDoesntExist();
     }
   }
+
+  if (reset) {
+    var mangementNode = res[2];
+    app = checkappliance.checkifServerExist(mangementNode);
+    if (app) {
+      resetStack(app);
+    } else {
+      applianceDoesntExist();
+    }
+  }
+
+  if (list) {
+    listStacks();
+  }
 });
+
+function resetStack(server) {
+  var ssh = new SSH({
+    host: server.hostname,
+    user: server.username,
+    pass: server.password,
+  });
+
+  ssh.exec('system', {
+    args: ['clean', 'apiconfig'],
+    out: console.log.bind(console),
+    in: ('no\n'),
+  }).start();
+}
+
+function listStacks() {
+  var stacks = checkappliance.listStacks();
+  for (var i = 0; i < stacks.length; i++) {
+    rtm.sendMessage(stacks.names[i] + ' = ' + stacks.hostnames[i], channel);
+  }
+}
 
 function checkApplianceSystem(server, command) {
   var reply = server.hostname + '\n ----------------\n';
@@ -62,7 +99,7 @@ function checkApplianceSystem(server, command) {
       if (stdout) { rtm.sendMessage(reply.concat(stdout), channel); };
     },
     err: function(stderr) {
-      console.log(stderr); // this-does-not-exist: command not found
+      console.log(stderr);
     },
     exit: function(code) {
       console.log(code);
