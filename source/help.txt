@@ -1,0 +1,13 @@
+```
+Stack Commands
+
+• list stacks = list all available stacks
+
+• show status of <stack> = displays current status of stack
+
+• show version of <stack> = displays current management version on stack
+
+• update <stack> to latest <build_number> = update firmware of stack to latest 50x build
+
+• reset <stack> = reset stacks to factory settings
+```
