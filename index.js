@@ -1,5 +1,6 @@
 var checkappliance = require('./source/checkappliance.js');
 var config = require('./slack-config.json');
+var fs = require('fs');
 var RtmClient = require('@slack/client').RtmClient;
 var SSH = require('simple-ssh');
 
@@ -17,12 +18,13 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function(rtmStartData) {
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
   var res = message.text.split(' ');
 
+  var help = (res[0] === 'help');
+  var list = (res[0] === 'list' && res[1] === 'stacks');
+  var reset = (res[0] === 'reset' && res[1] === 'stack');
   var status = (res[0] === 'show' && res[1] === 'status' && res[2] === 'of');
-  var version = (res[0] === 'show' && res[1] === 'version' && res[2] === 'of');
   var update = (res[0] === 'update' && res[2] === 'stack' &&
    res[3] === 'to' && res[4] === 'latest');
-  var reset = (res[0] === 'reset' && res[1] === 'stack');
-  var list = (res[0] === 'list' && res[1] === 'stacks');
+  var version = (res[0] === 'show' && res[1] === 'version' && res[2] === 'of');
 
   if (status || version) {
     var nodeCommand = res[1];
@@ -60,7 +62,16 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
   if (list) {
     listStacks();
   }
+
+  if (help) {
+    displayHelp();
+  }
 });
+
+function displayHelp() {
+  var help = fs.readFileSync('./source/help.txt').toString();
+  rtm.sendMessage(help, channel);
+}
 
 function resetStack(server) {
   var ssh = new SSH({
