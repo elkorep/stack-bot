@@ -7,7 +7,7 @@ Stack Commands
 
 • show version of <stack> = displays current management version on stack
 
-• update <stack> to latest <build_number> = update firmware of stack to latest 50x build
+• update <stack> stack to latest <build_number> = update firmware of stack to latest 50x build
 
 • reset <stack> = reset stacks to factory settings
 ```
