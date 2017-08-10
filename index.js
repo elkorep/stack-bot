@@ -1,15 +1,17 @@
 var checkappliance = require('./source/checkappliance.js');
+var childProcess = require('child_process');
 var config = require('./slack-config.json');
 var fs = require('fs');
-var RtmClient = require('@slack/client').RtmClient;
-var SSH = require('simple-ssh');
+var simpleSSH = require('simple-ssh');
+var updateappliance = require('./source/updateappliance.js');
 
 var CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
+var RTM_CLIENT = require('@slack/client').RtmClient;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 
 var botToken = config.botToken;
 var channel = config.slackchannel;
-var rtm = new RtmClient(botToken);
+var rtm = new RTM_CLIENT(botToken);
 
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function(rtmStartData) {
   console.log('Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}');
@@ -43,7 +45,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
     var buildVersion = res[5];
     app = checkappliance.checkifServerExist(mangementNode);
     if (app) {
-      upgradeApplianceToLatest(app, buildVersion);
+      updateappliance.upgradeAppliance(app, buildVersion);
     } else {
       applianceDoesntExist();
     }
@@ -74,7 +76,7 @@ function displayHelp() {
 }
 
 function resetStack(server) {
-  var ssh = new SSH({
+  var ssh = new simpleSSH({
     host: server.hostname,
     user: server.username,
     pass: server.password,
@@ -83,7 +85,7 @@ function resetStack(server) {
   ssh.exec('system', {
     args: ['clean', 'apiconfig'],
     out: console.log.bind(console),
-    in: ('no\n'),
+    in: ('yes\n'),
   }).start();
 }
 
@@ -96,31 +98,18 @@ function listStacks() {
 
 function checkApplianceSystem(server, command) {
   var reply = server.hostname + '\n ----------------\n';
-  var errorReply = server.name + ' stack is unresponsive...please troubleshoot\n';
+  var errorReply = server.name + ' stack is unresponsive...please troubleshoot';
 
-  var ssh = new SSH({
-    host: server.hostname,
-    user: server.username,
-    pass: server.password,
+  var cmd = 'sshpass -p ' + server.password + ' ssh ' +
+   server.username + '@' + server.hostname + ' system show ' + command;
+  var stat = childProcess.exec(cmd, function(err, stdout, stderr) {
+    if (stdout) { rtm.sendMessage(reply.concat(stdout), channel); };
+    if (stderr) { rtm.sendMessage(stderr, channel); };
   });
 
-  ssh.exec('system', {
-    args: ['show', command],
-    out: function(stdout) {
-      if (stdout) { rtm.sendMessage(reply.concat(stdout), channel); };
-    },
-    err: function(stderr) {
-      console.log(stderr);
-    },
-    exit: function(code) {
-      console.log(code);
-      if (code == 1) { rtm.sendMessage(errorReply, channel); };
-    },
-  }).start();
-
-  ssh.on('error', function(err) {
-    rtm.sendMessage(errorReply.concat(err), channel);
-    ssh.end();
+  stat.on('exit', function(code) {
+    console.log('child process spawn exited with exit code ' + code);
+    if (code == 255) { rtm.sendMessage(errorReply, channel); };
   });
 }
 
