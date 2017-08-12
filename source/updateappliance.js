@@ -49,9 +49,14 @@ function update(buildUrl, buildVcrypt2) {
     //source is the read stream the write stream will receive output from
     },
     onCommandTimeout: function(command, response, stream, connection) {
-      if (command === cmd1) {
-        console.log(response);
-        stream.write('no\n');
+      console.log('\n----\n' + response + '\n----\n');
+
+      if (response.endsWith('com\':')) {
+        stream.write(intranetPw + enter);
+      };
+
+      if (command === cmd1 && response.endsWith('(yes/no): ')) {
+        stream.write('yes' + enter);
       }
     },
   };

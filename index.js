@@ -98,7 +98,7 @@ function listStacks() {
 
 function checkApplianceSystem(server, command) {
   var reply = server.hostname + '\n ----------------\n';
-  var errorReply = server.name + ' stack is unresponsive...please troubleshoot';
+  var errorReply = server.hostname + ' : UNABLE TO CONNECT...SEE ERROR BELOW';
 
   var cmd = 'sshpass -p ' + server.password + ' ssh ' +
    server.username + '@' + server.hostname + ' system show ' + command;
