@@ -33,10 +33,8 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
     var mangementNode = res[3];
     app = checkappliance.checkifServerExist(mangementNode);
     console.log('App index.js' + JSON.stringify(app));
-    if (app.alive) {
+    if (app) {
       checkApplianceSystem(app, nodeCommand);
-    } else if (app.alive == false) {
-
     } else {
       applianceDoesntExist();
     }

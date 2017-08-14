@@ -36,8 +36,8 @@ function pingServer(app) {
   server = app.hostname;
 
   ping.promise.probe(server, {
-    timeout: 5,
-    extra: ['-i 1'],
+    timeout: 1,
+    extra: ['-i 0.1'],
   }).then(function(res) {
     console.log(res.alive);
     app.alive = res.alive;
