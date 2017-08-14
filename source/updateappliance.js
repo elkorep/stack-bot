@@ -52,11 +52,12 @@ function update(buildUrl, buildVcrypt2) {
       console.log('\n----\n' + response + '\n----\n');
 
       if (response.endsWith('com\':')) {
-        stream.write(intranetPw + enter);
+        var pass = intranetPw + '\n';
+        stream.write(pass);
       };
 
       if (command === cmd1 && response.endsWith('(yes/no): ')) {
-        stream.write('yes' + enter);
+        stream.write('yes\n');
       }
     },
   };
