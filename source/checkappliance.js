@@ -11,6 +11,7 @@ exports.checkifServerExist = function(serverName) {
         password: appliance[i].password,
       };
       pingServer(app);
+      console.log(app);
       return app;
     }
   }
@@ -32,11 +33,16 @@ exports.listStacks = function() {
 };
 
 function pingServer(app) {
-  var cfg = {
-    timeout: 10,
-    extra: ['-i 2'],
-  };
-  ping.sys.probe(app.hostname, function(isAlive) {
-    app.alive = isAlive;
-  }, cfg);
+  server = app.hostname;
+
+  ping.promise.probe(server, {
+    timeout: 5,
+    extra: ['-i 1'],
+  }).then(function(res) {
+    console.log(res.alive);
+    app.alive = res.alive;
+    console.log(JSON.stringify(app));
+    return app;
+  });
+  return;
 };
