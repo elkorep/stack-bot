@@ -33,8 +33,10 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
     var mangementNode = res[3];
     app = checkappliance.checkifServerExist(mangementNode);
 
-    if (app) {
+    if (app.alive) {
       checkApplianceSystem(app, nodeCommand);
+    } else if (app.alive == false) {
+
     } else {
       applianceDoesntExist();
     }
@@ -92,7 +94,8 @@ function resetStack(server) {
 function listStacks() {
   var stacks = checkappliance.listStacks();
   for (var i = 0; i < stacks.length; i++) {
-    rtm.sendMessage(stacks.names[i] + ' = ' + stacks.hostnames[i], channel);
+    var available = stacks.alive[i] ? ' is alive' : ' is dead';
+    rtm.sendMessage(stacks.names[i] + ' = ' + stacks.hostnames[i] + available, channel);
   }
 }
 
@@ -116,6 +119,11 @@ function checkApplianceSystem(server, command) {
 function applianceDoesntExist() {
   rtm.sendMessage('Appliance does not exist', channel);
   console.log('server doesnt exist');
+}
+
+function applianceDoesntExist() {
+  rtm.sendMessage('Appliance is down...please troubleshoot', channel);
+  console.log('cannot reach server');
 }
 
 rtm.start();
