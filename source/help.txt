@@ -9,5 +9,5 @@ Stack Commands
 
 • update <stack> stack to latest <build_number> = update firmware of stack to latest 50x build
 
-• reset <stack> = reset stacks to factory settings
+• reset stack <stack> = reset stacks to factory settings
 ```
