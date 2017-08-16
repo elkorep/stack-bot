@@ -31,13 +31,13 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
   if (status || version) {
     var nodeCommand = res[1];
     var mangementNode = res[3];
-    app = checkappliance.checkifServerExist(mangementNode);
-    console.log('App index.js' + JSON.stringify(app));
-    if (app) {
-      checkApplianceSystem(app, nodeCommand);
-    } else {
-      applianceDoesntExist();
-    }
+    checkappliance.checkifServerExist(mangementNode).then(function(app) {
+      if (app.alive) {
+        checkApplianceSystem(app, nodeCommand);
+      } else {
+        applianceDoesntExist();
+      }
+    });
   }
 
   if (update) {
