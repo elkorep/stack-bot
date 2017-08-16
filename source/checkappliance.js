@@ -3,18 +3,16 @@ var ping = require('ping');
 
 exports.checkifServerExist = function(serverName) {
   return new Promise(function(resolve, reject) {
-    for (var i = 0; i < Object.keys(appliance).length; i++) {
-      if (serverName === appliance[i].name) {
-        var app = {
-          name: appliance[i].name,
-          hostname: appliance[i].hostname,
-          username: appliance[i].username,
-          password: appliance[i].password,
-        };
-        pingServer(app).then(function() {
-          resolve(app);
-        });
-      }
+    if (appliance[serverName]) {
+      var app = {
+        name: appliance[serverName].name,
+        hostname: appliance[serverName].hostname,
+        username: appliance[serverName].username,
+        password: appliance[serverName].password,
+      };
+      pingServer(app).then(function() {
+        resolve(app);
+      });
     }
     return;
   });
@@ -27,9 +25,9 @@ exports.listStacks = function() {
     hostnames: [],
   };
 
-  for (var i = 0; i < Object.keys(appliance).length; i++) {
-    stacks.names[i] = appliance[i].name;
-    stacks.hostnames[i] = appliance[i].hostname;
+  for (var stack in appliance) {
+    stacks.names[i] = stack;
+    stacks.hostnames[i] = appliance[stack].hostname;
   }
   return stacks;
 };
