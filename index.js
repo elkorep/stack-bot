@@ -92,8 +92,7 @@ function resetStack(server) {
 function listStacks() {
   var stacks = checkappliance.listStacks();
   for (var i = 0; i < stacks.length; i++) {
-    var available = stacks.alive[i] ? ' is alive' : ' is dead';
-    rtm.sendMessage(stacks.names[i] + ' = ' + stacks.hostnames[i] + available, channel);
+    rtm.sendMessage(stacks.names[i] + ' = ' + stacks.hostnames[i], channel);
   }
 }
 

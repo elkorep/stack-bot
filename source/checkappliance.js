@@ -24,10 +24,9 @@ exports.listStacks = function() {
     names: [],
     hostnames: [],
   };
-
   for (var stack in appliance) {
-    stacks.names[i] = stack;
-    stacks.hostnames[i] = appliance[stack].hostname;
+    stacks.names.push(stack);
+    stacks.hostnames.push(appliance[stack].hostname);
   }
   return stacks;
 };
@@ -40,9 +39,7 @@ function pingServer(app) {
       timeout: 1,
       extra: ['-i 0.1'],
     }).then(function(res) {
-      console.log(res.alive);
       app.alive = res.alive;
-      console.log(JSON.stringify(app));
       resolve(app);
     });
   });
