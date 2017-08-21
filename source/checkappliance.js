@@ -5,12 +5,12 @@ exports.checkifServerExist = function(serverName) {
   return new Promise(function(resolve, reject) {
     if (appliance[serverName]) {
       var app = {
-        name: appliance[serverName].name,
         hostname: appliance[serverName].hostname,
         username: appliance[serverName].username,
         password: appliance[serverName].password,
       };
-      pingServer(app).then(function() {
+      pingServer(app).then(function(app) {
+        //inside of here, app is resolved from pingServer
         resolve(app);
       });
     }

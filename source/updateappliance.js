@@ -25,11 +25,11 @@ exports.upgradeAppliance = function(app, buildVersion) {
     buildregex = body.match(regex)[1];
     buildsplitregex  = S(buildregex).between('href="', '.ova').s;
     buildVcrypt2 = buildsplitregex + '.vcrypt2';
-    update(buildUrl, buildVcrypt2);
+    update(app, buildUrl, buildVcrypt2);
   });
 };
 
-function update(buildUrl, buildVcrypt2) {
+function update(app, buildUrl, buildVcrypt2) {
   firmwareURL = buildUrl + buildVcrypt2;
   var cmd1 = 'system update firmware from url ' + firmwareURL + ' user ' + intranetId;
 

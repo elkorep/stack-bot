@@ -43,12 +43,13 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
   if (update) {
     var mangementNode = res[1];
     var buildVersion = res[5];
-    app = checkappliance.checkifServerExist(mangementNode);
-    if (app) {
-      updateappliance.upgradeAppliance(app, buildVersion);
-    } else {
-      applianceDoesntExist();
-    }
+    checkappliance.checkifServerExist(mangementNode).then(function(app) {
+      if (app) {
+        updateappliance.upgradeAppliance(app, buildVersion);
+      } else {
+        applianceDoesntExist();
+      }
+    });
   }
 
   if (reset) {
