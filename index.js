@@ -34,9 +34,9 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
           var mangementNode = res[4];
           checkappliance.checkifServerExist(mangementNode).then(function (app) {
               if (app.alive) {
-                  checkApplianceSystem(app, nodeCommand);
+                  checkApplianceSystem(app, nodeCommand, message);
               } else {
-                  applianceDoesntExist();
+                  applianceDoesntExist(message);
               }
           });
       }
@@ -48,7 +48,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
               if (app) {
                   updateappliance.upgradeAppliance(app, buildVersion);
               } else {
-                  applianceDoesntExist();
+                  applianceDoesntExist(message);
               }
           });
       }
@@ -59,23 +59,23 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
           if (app) {
               resetStack(app);
           } else {
-              applianceDoesntExist();
+              applianceDoesntExist(message);
           }
       }
 
       if (list) {
-          listStacks();
+          listStacks(message);
       }
 
       if (help) {
-          displayHelp();
+          displayHelp(message);
       }
   }
 });
 
-function displayHelp() {
+function displayHelp(message) {
   var help = fs.readFileSync('./source/help.txt').toString();
-  rtm.sendMessage(help, channel);
+  rtm.sendMessage(help, message.channel);
 }
 
 function resetStack(server) {
@@ -92,37 +92,37 @@ function resetStack(server) {
   }).start();
 }
 
-function listStacks() {
+function listStacks(message) {
   var stacks = checkappliance.listStacks();
   for (var i = 0; i < stacks.length; i++) {
-    rtm.sendMessage(stacks.names[i] + ' = ' + stacks.hostnames[i], channel);
+    rtm.sendMessage(stacks.names[i] + ' = ' + stacks.hostnames[i], message.channel);
   }
 }
 
-function checkApplianceSystem(server, command) {
+function checkApplianceSystem(server, command, message) {
   var reply = server.hostname + '\n ----------------\n';
   var errorReply = server.hostname + ' : UNABLE TO CONNECT...SEE ERROR BELOW';
 
   var cmd = 'sshpass -p ' + server.password + ' ssh ' +
    server.username + '@' + server.hostname + ' system show ' + command;
   var stat = childProcess.exec(cmd, function(err, stdout, stderr) {
-    if (stdout) { rtm.sendMessage(reply.concat(stdout), channel); };
-    if (stderr) { rtm.sendMessage(stderr, channel); };
+    if (stdout) { rtm.sendMessage(reply.concat(stdout), message.channel); };
+    if (stderr) { rtm.sendMessage(stderr, message.channel); };
   });
 
   stat.on('exit', function(code) {
     console.log('child process spawn exited with exit code ' + code);
-    if (code == 255) { rtm.sendMessage(errorReply, channel); };
+    if (code == 255) { rtm.sendMessage(errorReply, message.channel); };
   });
 }
 
-function applianceDoesntExist() {
-  rtm.sendMessage('Appliance does not exist', channel);
+function applianceDoesntExist(message) {
+  rtm.sendMessage('Appliance does not exist', message.channel);
   console.log('server doesnt exist');
 }
 
-function applianceDoesntExist() {
-  rtm.sendMessage('Appliance is down...please troubleshoot', channel);
+function applianceDown(message) {
+  rtm.sendMessage('Appliance is down...please troubleshoot', message.channel);
   console.log('cannot reach server');
 }
 
