@@ -19,21 +19,19 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function(rtmStartData) {
 });
 
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
-  console.log(message);
-  if(message.text.indexOf('stackbot') > -1 || message.text.indexOf(botName) > -1) {
-      var res = message.text.split(' ');
-
-      var help = (res[0] === 'help');
-      var list = (res[0] === 'list' && res[1] === 'stacks');
-      var reset = (res[0] === 'reset' && res[1] === 'stack');
-      var status = (res[0] === 'show' && res[1] === 'status' && res[2] === 'of');
-      var update = (res[0] === 'update' && res[2] === 'stack' &&
-      res[3] === 'to' && res[4] === 'latest');
-      var version = (res[0] === 'show' && res[1] === 'version' && res[2] === 'of');
+  var res = message.text.toLowerCase().split(' ');
+  if(res[0] === 'stackbot' || res[0] === botName) {
+      var help = (res[1] === 'help');
+      var list = (res[1] === 'list' && res[2] === 'stacks');
+      var reset = (res[1] === 'reset' && res[2] === 'stack');
+      var status = (res[1] === 'show' && res[2] === 'status' && res[3] === 'of');
+      var update = (res[1] === 'update' && res[3] === 'stack' &&
+      res[4] === 'to' && res[5] === 'latest');
+      var version = (res[1] === 'show' && res[2] === 'version' && res[3] === 'of');
 
       if (status || version) {
-          var nodeCommand = res[1];
-          var mangementNode = res[3];
+          var nodeCommand = res[2];
+          var mangementNode = res[4];
           checkappliance.checkifServerExist(mangementNode).then(function (app) {
               if (app.alive) {
                   checkApplianceSystem(app, nodeCommand);
@@ -44,8 +42,8 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
       }
 
       if (update) {
-          var mangementNode = res[1];
-          var buildVersion = res[5];
+          var mangementNode = res[2];
+          var buildVersion = res[6];
           checkappliance.checkifServerExist(mangementNode).then(function (app) {
               if (app) {
                   updateappliance.upgradeAppliance(app, buildVersion);
@@ -56,7 +54,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
       }
 
       if (reset) {
-          var mangementNode = res[2];
+          var mangementNode = res[3];
           app = checkappliance.checkifServerExist(mangementNode);
           if (app) {
               resetStack(app);
