@@ -14,7 +14,7 @@ var channel = config.slackchannel;
 var rtm = new RTM_CLIENT(botToken);
 
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function(rtmStartData) {
-  console.log('Logged in as " + rtmStartData.self.name + " of team " + rtmStartData.team.name);
+  console.log('Logged in as ' + rtmStartData.self.name + ' of team ' + rtmStartData.team.name);
 });
 
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
