@@ -3,5 +3,6 @@
   "buildsURL":"",
   "intranetId":"",
   "intranetPw":"",
-  "slackchannel":""
+  "slackchannel":"",
+  "botName":""
 }

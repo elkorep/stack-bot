@@ -11,6 +11,7 @@ var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 
 var botToken = config.botToken;
 var channel = config.slackchannel;
+var botName = config.botName;
 var rtm = new RTM_CLIENT(botToken);
 
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function(rtmStartData) {
@@ -18,56 +19,59 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function(rtmStartData) {
 });
 
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
-  var res = message.text.split(' ');
+  console.log(message);
+  if(message.text.indexOf('stackbot') > -1 || message.text.indexOf(botName) > -1) {
+      var res = message.text.split(' ');
 
-  var help = (res[0] === 'help');
-  var list = (res[0] === 'list' && res[1] === 'stacks');
-  var reset = (res[0] === 'reset' && res[1] === 'stack');
-  var status = (res[0] === 'show' && res[1] === 'status' && res[2] === 'of');
-  var update = (res[0] === 'update' && res[2] === 'stack' &&
-   res[3] === 'to' && res[4] === 'latest');
-  var version = (res[0] === 'show' && res[1] === 'version' && res[2] === 'of');
+      var help = (res[0] === 'help');
+      var list = (res[0] === 'list' && res[1] === 'stacks');
+      var reset = (res[0] === 'reset' && res[1] === 'stack');
+      var status = (res[0] === 'show' && res[1] === 'status' && res[2] === 'of');
+      var update = (res[0] === 'update' && res[2] === 'stack' &&
+      res[3] === 'to' && res[4] === 'latest');
+      var version = (res[0] === 'show' && res[1] === 'version' && res[2] === 'of');
 
-  if (status || version) {
-    var nodeCommand = res[1];
-    var mangementNode = res[3];
-    checkappliance.checkifServerExist(mangementNode).then(function(app) {
-      if (app.alive) {
-        checkApplianceSystem(app, nodeCommand);
-      } else {
-        applianceDoesntExist();
+      if (status || version) {
+          var nodeCommand = res[1];
+          var mangementNode = res[3];
+          checkappliance.checkifServerExist(mangementNode).then(function (app) {
+              if (app.alive) {
+                  checkApplianceSystem(app, nodeCommand);
+              } else {
+                  applianceDoesntExist();
+              }
+          });
       }
-    });
-  }
 
-  if (update) {
-    var mangementNode = res[1];
-    var buildVersion = res[5];
-    checkappliance.checkifServerExist(mangementNode).then(function(app) {
-      if (app) {
-        updateappliance.upgradeAppliance(app, buildVersion);
-      } else {
-        applianceDoesntExist();
+      if (update) {
+          var mangementNode = res[1];
+          var buildVersion = res[5];
+          checkappliance.checkifServerExist(mangementNode).then(function (app) {
+              if (app) {
+                  updateappliance.upgradeAppliance(app, buildVersion);
+              } else {
+                  applianceDoesntExist();
+              }
+          });
       }
-    });
-  }
 
-  if (reset) {
-    var mangementNode = res[2];
-    app = checkappliance.checkifServerExist(mangementNode);
-    if (app) {
-      resetStack(app);
-    } else {
-      applianceDoesntExist();
-    }
-  }
+      if (reset) {
+          var mangementNode = res[2];
+          app = checkappliance.checkifServerExist(mangementNode);
+          if (app) {
+              resetStack(app);
+          } else {
+              applianceDoesntExist();
+          }
+      }
 
-  if (list) {
-    listStacks();
-  }
+      if (list) {
+          listStacks();
+      }
 
-  if (help) {
-    displayHelp();
+      if (help) {
+          displayHelp();
+      }
   }
 });
 
