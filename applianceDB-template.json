@@ -1,0 +1,7 @@
+{
+  "<name>": {
+    "hostname": <hostname>,
+    "username": <username>,
+    "password": <password>
+  }
+}
