@@ -20,7 +20,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function(rtmStartData) {
 
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
   var res = message.text.toLowerCase().split(' ');
-  if(res[0] === 'stackbot' || res[0] === botName) {
+  if(res[0] === 'stackbot' || res[0].indexOf(botName) > -1) {
       var help = (res[1] === 'help');
       var list = (res[1] === 'list' && res[2] === 'stacks');
       var reset = (res[1] === 'reset' && res[2] === 'stack');
