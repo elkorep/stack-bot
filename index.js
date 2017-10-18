@@ -19,7 +19,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function(rtmStartData) {
 });
 
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
-  if(message) {
+  if(message.text) {
     var res = message.text.toLowerCase().split(' ');
     if(res[0] === 'stackbot' || res[0].indexOf(botName.toLowerCase()) > -1) {
         var help = (res[1] === 'help');
