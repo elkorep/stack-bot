@@ -4,5 +4,6 @@
   "intranetId":"",
   "intranetPw":"",
   "slackchannel":"",
-  "botName":""
+  "botName":"",
+  "botId":""
 }

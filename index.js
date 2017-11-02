@@ -12,6 +12,7 @@ var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 var botToken = config.botToken;
 var channel = config.slackchannel;
 var botName = config.botName;
+var botId = config.botId;
 var rtm = new RTM_CLIENT(botToken);
 
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function(rtmStartData) {
@@ -21,7 +22,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function(rtmStartData) {
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
   if(message.text) {
     var res = message.text.toLowerCase().split(' ');
-    if(res[0] === 'stackbot' || res[0].indexOf(botName.toLowerCase()) > -1) {
+    if(res[0].indexOf(botId) > -1 || res[0].indexOf(botName) > -1) {
         var help = (res[1] === 'help');
         var list = (res[1] === 'list' && res[2] === 'stacks');
         var reset = (res[1] === 'reset' && res[2] === 'stack');
